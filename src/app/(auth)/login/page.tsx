@@ -27,17 +27,24 @@ const Page = () => {
             console.log('formData:', formData);
             const response = await axios.post('/api/v1/auth/login', formData);
             toast.success('Login successful!');
-            if(response.data.role === 'restaurant owner'){
-                router.push('/rest');
+    
+            const { role, hasRestaurant } = response.data;
+    
+            if (role === 'restaurant owner') {
+                if (hasRestaurant) {
+                    router.push('/dashboard/restaurant'); // Redirect to /owner-menuitems if the user already has a restaurant
+                } else {
+                    router.push('/rest'); // Redirect to /rest if the user does not have a restaurant
+                }
             } else {
-                router.push('/menu');
+                router.push('/dashboard/foodie'); // Redirect to /dashboard/foodie if the user is a foodie
             }
-        } catch (error) {
+        } catch (error:any) {
             console.error('Login error:', error.response ? error.response.data : error.message);
             toast.error('Login failed. Please try again.');
         }
-    }
-
+    };
+    
     return (
         <div className="min-h-screen text-black bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-lg shadow-xl overflow-hidden">

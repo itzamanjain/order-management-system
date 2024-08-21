@@ -8,6 +8,7 @@ export interface IUser extends Document {
   username: string;
   role: string;
   orders?: mongoose.Types.ObjectId[];
+  restaurantId?: mongoose.Types.ObjectId;
  
 }
 
@@ -38,6 +39,10 @@ const userSchema = new mongoose.Schema<IUser>(
         enum: ["foodie", "restaurant owner"],
         default: "foodie",
         
+    },
+    restaurantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "restaurants",
     },
     orders: [{
       type: mongoose.Schema.Types.ObjectId,

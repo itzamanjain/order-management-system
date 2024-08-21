@@ -1,41 +1,81 @@
-'use client'
-import React, { useState } from 'react';
+'use client';
+import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
 const RestaurantDashboard = () => {
-  const [menuItem, setMenuItem] = useState({
+  const [restaurantId, setRestaurantId] = useState<string>('');
+
+  const [menuItem, setMenuItem] = useState<{
+    name: string;
+    price: string;
+    description: string;
+    mainIngredient: string;
+    cuisine: string;
+    image: File | null;
+  }>({
     name: '',
     price: '',
     description: '',
     mainIngredient: '',
-    cuisine: ''
+    cuisine: '',
+    image: null,
   });
 
-  const handleInputChange = (e:any) => {
+  useEffect(() => {
+    // Fetch the restaurant ID when the component mounts
+    fetchRestaurentId();
+  }, []);
+
+  const fetchRestaurentId = async () => {
+    try {
+      const response = await axios.get('/api/v1/auth/me');
+      setRestaurantId(response.data.restaurantId);
+    } catch (error) {
+      console.error('Error fetching restaurant id:', error);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setMenuItem(prevState => ({
+    setMenuItem((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = async (e:any) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    setMenuItem((prevState) => ({
+      ...prevState,
+      image: file,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would make your API call
-    console.log('Submitting menu item:', menuItem);
-    // Example API call (uncomment and modify as needed):
-    // try {
-    //   const response = await fetch('/api/menu-items', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(menuItem)
-    //   });
-    //   if (response.ok) {
-    //     console.log('Menu item added successfully');
-    //     setMenuItem({ name: '', price: '', description: '', mainIngredient: '' });
-    //   }
-    // } catch (error) {
-    //   console.error('Error adding menu item:', error);
-    // }
+
+    const formData = new FormData();
+    formData.append('name', menuItem.name);
+    formData.append('price', menuItem.price);
+    formData.append('description', menuItem.description);
+    formData.append('mainIngredient', menuItem.mainIngredient);
+    formData.append('cuisine', menuItem.cuisine);
+    formData.append('restaurantId', restaurantId); // Append restaurantId to FormData
+    if (menuItem.image) {
+      formData.append('image', menuItem.image); // Append image file to FormData
+    }
+
+    try {
+      const response = await axios.post('/api/v1/owner/menu-items', formData);
+      if (response.status === 201) {
+        toast.success("Item added successfully");
+        setMenuItem({ name: '', price: '', description: '', mainIngredient: '', cuisine: '', image: null });
+      }
+    } catch (error) {
+      console.error("Error while adding menu item:", error);
+      toast.error("Failed to add menu item");
+    }
   };
 
   return (
@@ -69,7 +109,7 @@ const RestaurantDashboard = () => {
               />
             </div>
             <div>
-              <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700">cuisine</label>
+              <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700">Cuisine</label>
               <input
                 type="text"
                 id="cuisine"
@@ -103,7 +143,16 @@ const RestaurantDashboard = () => {
                 className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
               ></textarea>
             </div>
-            
+            <div>
+              <label htmlFor="image" className="block text-sm font-medium text-gray-700">Menu Item Image</label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                onChange={handleImageChange}
+                className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+              />
+            </div>
             <div>
               <button
                 type="submit"
@@ -115,6 +164,7 @@ const RestaurantDashboard = () => {
           </form>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };

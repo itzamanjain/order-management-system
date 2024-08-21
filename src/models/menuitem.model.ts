@@ -25,7 +25,7 @@ const menuItemSchema = new mongoose.Schema(
         type: Number,
         required: true,
         },
-        image: {
+        imageUrl: {
         type: String,
         },
         restaurantId: {

@@ -1,18 +1,15 @@
 import { connectDb } from "@/dbconfig/dbconfig";
-import User from "@/models/user.model"
+import User from "@/models/user.model";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 connectDb();
 
-
-export async function POST(request:NextRequest){
+export async function POST(request: NextRequest) {
     try {
         const reqBody = await request.json();
-        console.log("requsest received",reqBody);
-        const { email,password } = reqBody;
-        console.log(reqBody);
+        const { email, password } = reqBody;
 
         if (!email || !password) {
             return NextResponse.json(
@@ -21,8 +18,8 @@ export async function POST(request:NextRequest){
             );
         }
 
-        const existingUser = await User.findOne({email});
-        if(!existingUser){
+        const existingUser = await User.findOne({ email });
+        if (!existingUser) {
             return NextResponse.json(
                 { message: "User does not exist" },
                 { status: 400 }
@@ -30,7 +27,7 @@ export async function POST(request:NextRequest){
         }
 
         const validPassword = await bcryptjs.compare(password, existingUser.password);
-        if(!validPassword){
+        if (!validPassword) {
             return NextResponse.json(
                 { message: "Invalid password" },
                 { status: 400 }
@@ -40,28 +37,31 @@ export async function POST(request:NextRequest){
         const tokenData = {
             id: existingUser._id,
             email: existingUser.email,
-          };
-      
-          const token = jwt.sign(tokenData, process.env.TOKEN_SECRET!, {
+        };
+
+        const token = jwt.sign(tokenData, process.env.TOKEN_SECRET!, {
             expiresIn: "1d",
-          });
+        });
 
-          const role = existingUser.role;
+        const role = existingUser.role;
 
-        const response =  NextResponse.json(
-            { message: "Login successful", success: true, token, role },
+        // Check if the user has a restaurantId
+        const hasRestaurant = !!existingUser.restaurantId;
+
+        const response = NextResponse.json(
+            { message: "Login successful", success: true, token, role, hasRestaurant },
             { status: 200 }
         );
-        
-    response.cookies.set("token", token, { httpOnly: true });
 
-    return response;
+        response.cookies.set("token", token, { httpOnly: true });
+
+        return response;
 
     } catch (error: any) {
+        console.error("Login failed:", error);
         return NextResponse.json(
-            { message: "Failed to create user" },
+            { message: "Login failed" },
             { status: 500 }
         );
-        
     }
 }
