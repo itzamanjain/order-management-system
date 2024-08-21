@@ -13,7 +13,7 @@ const Page = () => {
         password: ''
     });
 
-    const handleChange = (e) => {
+    const handleChange = (e:any) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
             ...prevState,
@@ -21,7 +21,7 @@ const Page = () => {
         }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e:any) => {
         e.preventDefault();
         try {
             console.log('formData:', formData);
@@ -83,7 +83,7 @@ const Page = () => {
                                 Login
                             </button>
                             <Link href='/signup'>
-                                <p className="text-md mt-4 underline text-black">Don't Have an account? Signup</p>
+                                <p className="text-md mt-4 underline text-black">Dont Have an account? Signup</p>
                             </Link>
                         </div>
                     </form>
