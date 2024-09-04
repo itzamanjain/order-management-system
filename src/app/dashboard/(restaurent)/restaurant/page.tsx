@@ -80,11 +80,11 @@ const RestaurantDashboard = () => {
   };
 
   return (
-    <div className='flex min-h-screen '>
-  <div className='w-1/5'>
+    <div className='flex '>
+  <div className='min-h-screen'>
     <Sidebar />
   </div>
-  <div className='w-4/5 min-h-screen text-black bg-gradient-to-br from-amber-100 to-orange-300 p-6'>
+  <div className='w-full min-h-screen text-black bg-gradient-to-br from-amber-100 to-orange-300 p-6'>
     <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
       <div className="p-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Restaurant Dashboard</h1>

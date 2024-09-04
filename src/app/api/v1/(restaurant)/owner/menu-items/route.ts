@@ -63,11 +63,17 @@ export async function POST(request: NextRequest) {
       description,
       price,
       imageUrl,
-      restaurantId, // todo not coming in the body 
+      restaurantId 
     });
 
     const newMenuItem = await menuItem.save();
 
+    // push the menu items _id in the restaurant schema menu array 
+    await Restaurant.findByIdAndUpdate(
+      {_id:restaurantId},
+      { $push: { menu: newMenuItem._id } },
+      { new: true }
+    );
     // Return the response
     return NextResponse.json(
       { message: 'Menu item uploaded successfully', newMenuItem },
